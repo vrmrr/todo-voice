@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- No external scripts, styles, fonts, images or analytics. Nothing is sent anywhere except your own app link. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex">
+<meta name="apple-mobile-web-app-title" content="Add To-Do">
+<meta name="application-name" content="Add To-Do">
+<meta name="theme-color" content="#1a73e8">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%A4%3C/text%3E%3C/svg%3E">
+<title>Add To-Do</title>
+<style>
+  :root {
+    --bg: #ffffff; --fg: #202124; --muted: #5f6368; --line: #dadce0; --card: #f1f3f4;
+    --accent: #1a73e8; --accent-fg: #ffffff; --red: #d93025; --green: #188038;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #202124; --fg: #e8eaed; --muted: #9aa0a6; --line: #3c4043; --card: #2d2e31;
+      --accent: #8ab4f8; --accent-fg: #202124; --red: #f28b82; --green: #81c995; }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--fg); }
+  body { font: 18px/1.45 -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Segoe UI", sans-serif;
+    min-height: 100vh; min-height: 100dvh; padding: calc(16px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom));
+    display: flex; flex-direction: column; overflow-x: hidden; -webkit-text-size-adjust: 100%; }
+  button, textarea, input { font: inherit; color: inherit; }
+  h1 { font-size: 22px; margin: 0 0 8px; }
+  p { margin: 0 0 12px; }
+  .muted { color: var(--muted); font-size: 15px; }
+  [hidden] { display: none !important; }
+
+  /* listen screen */
+  #listen { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 20px; }
+  #mic { width: 168px; height: 168px; border-radius: 50%; border: 0; background: var(--accent); color: var(--accent-fg);
+    font-size: 76px; display: grid; place-items: center; box-shadow: 0 4px 16px rgba(0,0,0,.25); cursor: pointer; }
+  #mic.on { background: var(--red); animation: pulse 1.2s ease-in-out infinite; }
+  @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(217,48,37,.5); } 50% { box-shadow: 0 0 0 26px rgba(217,48,37,0); } }
+  #status { font-size: 20px; font-weight: 600; min-height: 1.5em; }
+  #words { width: 100%; min-height: 3.2em; font-size: 22px; padding: 12px 14px; border-radius: 14px; background: var(--card);
+    border: 1px solid var(--line); resize: none; text-align: left; overflow-wrap: anywhere; }
+  #words[readonly] { border-color: transparent; }
+  #countdown { width: 100%; height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; visibility: hidden; }
+  #countdown i { display: block; height: 100%; width: 0; background: var(--accent); }
+  #countdown.run { visibility: visible; }
+  #countdown.run i { width: 100%; transition: width 2s linear; }
+  .row { display: flex; gap: 10px; width: 100%; }
+  .btn { flex: 1; min-height: 52px; border-radius: 26px; border: 1px solid var(--line); background: var(--bg); padding: 0 16px; cursor: pointer; }
+  .btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); font-weight: 600; }
+  .help { width: 100%; text-align: left; background: var(--card); border-radius: 14px; padding: 12px 14px; font-size: 16px; }
+  .help > b:first-child { display: block; margin-bottom: 4px; }
+  .help ol { margin: 4px 0 0; padding-left: 20px; }
+  .err { color: var(--red); }
+  footer { text-align: center; font-size: 14px; margin-top: 12px; }
+  footer button { background: none; border: 0; color: var(--muted); text-decoration: underline; min-height: 44px; cursor: pointer; }
+
+  /* setup screen */
+  #setup textarea { width: 100%; min-height: 110px; border-radius: 12px; border: 1px solid var(--line); background: var(--card);
+    padding: 10px 12px; font-size: 15px; overflow-wrap: anywhere; }
+  #final { width: 100%; padding: 10px 12px; border-radius: 12px; background: var(--card); font-size: 14px; overflow-wrap: anywhere;
+    user-select: all; -webkit-user-select: all; }
+  .ok { color: var(--green); }
+</style>
+</head>
+<body>
+
+<!-- First-time setup -->
+<section id="setup" hidden>
+  <h1>🎤 Add To-Do: set up once</h1>
+  <p>Paste your To-Do app link. It's in the email "Your To-Do phone app link", or in the sheet under
+    <b>📋 AI To-Do → 📱 Phone app</b>. It ends in <b>/exec</b>.</p>
+  <textarea id="appInput" placeholder="https://script.google.com/a/macros/yourcompany.com/s/…/exec" autocapitalize="off" autocorrect="off" spellcheck="false"></textarea>
+  <p id="setupErr" class="err" hidden></p>
+  <div class="row" style="margin:8px 0 18px"><button class="btn primary" id="save" type="button">Save</button></div>
+
+  <div id="done" hidden>
+    <p class="ok"><b>Saved ✓</b> Your voice page is:</p>
+    <div id="final"></div>
+    <div class="row" style="margin:10px 0 14px"><button class="btn" id="copy" type="button">Copy link</button>
+      <button class="btn primary" id="start" type="button">Try it</button></div>
+    <div class="help">
+      <b>Put it on your home screen as "Add To-Do"</b>
+      <ol>
+        <li><b>iPhone (Safari):</b> Share button → <b>Add to Home Screen</b> → name it <b>Add To-Do</b> → Add.</li>
+        <li><b>Android (Chrome):</b> ⋮ → <b>Add to Home screen</b> → name it <b>Add To-Do</b> → Add.</li>
+      </ol>
+    </div>
+  </div>
+  <p class="muted" style="margin-top:16px">Privacy: this page has no server and no analytics. Your app link is kept only on this
+    phone (in this page's address after the # and in this browser's storage). What you say is turned into text by your phone's own
+    speech service and handed to your To-Do app.</p>
+</section>
+
+<!-- Listening -->
+<section id="listen" hidden>
+  <button id="mic" type="button" aria-label="Speak a task">🎤</button>
+  <div id="status" role="status" aria-live="polite">Tap the mic and say your task</div>
+  <textarea id="words" rows="2" readonly placeholder="Your words appear here" aria-label="Your task"></textarea>
+  <div id="countdown"><i></i></div>
+  <div class="row" id="pendingBtns" hidden>
+    <button class="btn" id="cancel" type="button">Cancel</button>
+    <button class="btn" id="edit" type="button">Edit</button>
+  </div>
+  <div class="row" id="editBtns" hidden>
+    <button class="btn" id="cancel2" type="button">Cancel</button>
+    <button class="btn primary" id="send" type="button">Add</button>
+  </div>
+  <div class="help" id="help" hidden></div>
+</section>
+
+<footer id="foot" hidden><button id="change" type="button">Change app link</button></footer>
+
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var KEY = 'todoAppUrl';
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  var isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+  /* ---------- the app link: only a Google Apps Script web app URL is accepted ---------- */
+  function cleanAppUrl(raw) {
+    var s = String(raw || '').trim().replace(/[\s"'<>]/g, '');
+    var m = s.match(/^https:\/\/script\.google\.com\/(?:a\/macros\/[A-Za-z0-9.-]+|macros)\/s\/[A-Za-z0-9_-]+\/exec/);
+    return m ? m[0] : '';
+  }
+  function store(v) { try { if (v === undefined) return localStorage.getItem(KEY) || ''; localStorage.setItem(KEY, v); } catch (e) { return ''; } return v; }
+  function fromHash() {
+    var m = location.hash.match(/(?:^#|&)app=([^&]+)/);
+    try { return m ? cleanAppUrl(decodeURIComponent(m[1])) : ''; } catch (e) { return ''; }
+  }
+  function pageUrlFor(app) { return location.href.split('#')[0] + '#app=' + encodeURIComponent(app); }
+
+  var appUrl = fromHash() || cleanAppUrl(store());
+  if (appUrl) { store(appUrl); if (!fromHash()) history.replaceState(null, '', pageUrlFor(appUrl)); }
+
+  /* ---------- setup screen ---------- */
+  function showSetup(prefill) {
+    stop();
+    $('listen').hidden = true; $('foot').hidden = true; $('setup').hidden = false;
+    $('appInput').value = prefill || '';
+    $('done').hidden = true; $('setupErr').hidden = true;
+  }
+  $('save').addEventListener('click', function () {
+    var u = cleanAppUrl($('appInput').value);
+    if (!u) {
+      $('setupErr').textContent = 'That doesn’t look like your app link. It starts with https://script.google.com/ and ends in /exec.';
+      $('setupErr').hidden = false; return;
+    }
+    appUrl = u; store(u);
+    history.replaceState(null, '', pageUrlFor(u));
+    $('setupErr').hidden = true;
+    $('final').textContent = pageUrlFor(u);
+    $('done').hidden = false;
+  });
+  $('copy').addEventListener('click', function () {
+    var t = $('final').textContent;
+    (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function () {
+      $('copy').textContent = 'Copied ✓';
+    }, function () { $('copy').textContent = 'Select the link above and copy'; });
+  });
+  $('start').addEventListener('click', function () { showListen(); begin(); });
+  $('change').addEventListener('click', function () { showSetup(appUrl); });
+
+  /* ---------- listening ---------- */
+  var rec = null, listening = false, finalText = '', timer = null, userStarted = false, sent = false;
+
+  function lang() {
+    var l = navigator.language || 'en-IN';
+    return /^en/i.test(l) ? 'en-IN' : l;   // Indian English understands Indian names best
+  }
+  function setStatus(t, err) { $('status').textContent = t; $('status').className = err ? 'err' : ''; }
+  function help(html) { var h = $('help'); if (html) { h.innerHTML = html; h.hidden = false; } else { h.hidden = true; h.innerHTML = ''; } }
+
+  function showListen() {
+    $('setup').hidden = true; $('listen').hidden = false; $('foot').hidden = false;
+    $('words').value = ''; $('words').readOnly = true;
+    $('pendingBtns').hidden = true; $('editBtns').hidden = true; help('');
+    if (!SR) {
+      setStatus('This browser can’t turn speech into text.', true);
+      help('<b>Open this page in ' + (isIOS ? 'Safari' : 'Chrome') + '.</b> Or type your task below and tap Add.');
+      typeMode();
+    } else {
+      setStatus('Tap the mic and say your task');
+    }
+  }
+
+  function begin() {
+    if (!SR || listening) return;
+    clearPending();
+    finalText = ''; sent = false;
+    $('words').value = ''; $('words').readOnly = true;
+    $('editBtns').hidden = true; help('');
+    try {
+      rec = new SR();
+      rec.lang = lang();
+      rec.interimResults = true;
+      rec.continuous = false;
+      rec.maxAlternatives = 1;
+      rec.onstart = function () { listening = true; $('mic').classList.add('on'); $('mic').setAttribute('aria-label', 'Stop'); setStatus('Listening… speak your task'); };
+      rec.onresult = function (ev) {
+        var interim = '';
+        for (var i = ev.resultIndex; i < ev.results.length; i++) {
+          if (ev.results[i].isFinal) finalText += ev.results[i][0].transcript;
+          else interim += ev.results[i][0].transcript;
+        }
+        $('words').value = (finalText + ' ' + interim).replace(/\s+/g, ' ').trim();
+      };
+      rec.onerror = function (ev) { onError(ev.error || 'error'); };
+      rec.onend = function () {
+        listening = false; $('mic').classList.remove('on'); $('mic').setAttribute('aria-label', 'Speak a task');
+        var text = $('words').value.trim();
+        if (text && !$('help').innerHTML) startPending();
+        else if (!text && !$('help').innerHTML) setStatus('Tap the mic and say your task');
+      };
+      rec.start();
+    } catch (e) {
+      onError('start-failed');
+    }
+  }
+
+  function onError(code) {
+    if (code === 'aborted') return;
+    if (code === 'not-allowed' && !userStarted) { setStatus('Tap the mic and say your task'); return; } // needs a tap first
+    if (code === 'no-speech') { setStatus('Didn’t hear anything. Tap the mic and try again.', true); return; }
+    if (code === 'not-allowed' || code === 'service-not-allowed') {
+      setStatus('The microphone is blocked for this page.', true);
+      help(isIOS
+        ? '<b>To allow it on iPhone:</b><ol><li>In Safari, tap <b>aA</b> (or the page icon) in the address bar → <b>Website Settings</b> → <b>Microphone: Allow</b>.</li>' +
+          '<li>Or Settings → <b>Apps → Safari</b> → <b>Microphone</b> → <b>Allow</b>.</li>' +
+          '<li>Voice also needs <b>Settings → General → Keyboard → Enable Dictation</b> switched on.</li></ol>Then tap the mic again.'
+        : '<b>To allow it on Android (Chrome):</b><ol><li>Tap the icon left of the address → <b>Permissions</b> → <b>Microphone: Allow</b>.</li>' +
+          '<li>Or Android Settings → <b>Apps → Chrome → Permissions → Microphone</b> → <b>Allow</b>.</li></ol>Then tap the mic again.');
+      typeMode();
+      return;
+    }
+    if (code === 'audio-capture') { setStatus('No microphone found.', true); help('<b>Check that no other app is using the microphone,</b> then tap the mic again.'); typeMode(); return; }
+    if (code === 'network') { setStatus('Voice needs an internet connection.', true); typeMode(); return; }
+    if (code === 'language-not-supported') { setStatus('Your phone’s language isn’t supported for voice here.', true); typeMode(); return; }
+    setStatus('Voice error: ' + code + '. Tap the mic to try again, or type.', true);
+    typeMode();
+  }
+
+  function stop() { if (rec && listening) { try { rec.abort(); } catch (e) { /* ignore */ } } clearPending(); }
+
+  function startPending() {
+    clearPending();
+    setStatus('Adding in 2 seconds…');
+    $('pendingBtns').hidden = false;
+    var bar = $('countdown');
+    bar.classList.remove('run'); void bar.offsetWidth; bar.classList.add('run');
+    timer = setTimeout(function () { timer = null; send(); }, 2000);
+  }
+  function clearPending() {
+    if (timer) { clearTimeout(timer); timer = null; }
+    $('countdown').classList.remove('run');
+    $('pendingBtns').hidden = true;
+  }
+  function typeMode() {
+    clearPending();
+    $('words').readOnly = false;
+    $('editBtns').hidden = false;
+  }
+
+  function send() {
+    var text = $('words').value.replace(/\s+/g, ' ').trim();
+    if (!text) { setStatus('Say or type a task first.', true); return; }
+    if (!appUrl) { showSetup(''); return; }
+    if (sent) return;
+    sent = true;
+    clearPending();
+    setStatus('Opening your To-Do…');
+    location.assign(appUrl + '?add=' + encodeURIComponent(text.slice(0, 1500)));
+  }
+
+  $('mic').addEventListener('click', function () {
+    userStarted = true;
+    if (listening) { rec.stop(); return; }
+    if (timer) { send(); return; }               // tapping during the countdown = add now
+    if (!SR) { $('words').focus(); return; }
+    begin();
+  });
+  $('cancel').addEventListener('click', function () { clearPending(); $('words').value = ''; setStatus('Cancelled. Tap the mic to try again.'); });
+  $('cancel2').addEventListener('click', function () { $('words').value = ''; $('words').readOnly = true; $('editBtns').hidden = true; help(''); setStatus('Tap the mic and say your task'); });
+  $('edit').addEventListener('click', function () { typeMode(); setStatus('Edit, then tap Add'); $('words').focus(); });
+  $('words').addEventListener('pointerdown', function () { if (timer) { typeMode(); setStatus('Edit, then tap Add'); } });
+  $('send').addEventListener('click', send);
+
+  // Coming back to the page (e.g. after adding, or from the home screen): ready to listen again.
+  window.addEventListener('pageshow', function (e) {
+    if (e.persisted && appUrl) { sent = false; showListen(); }
+  });
+
+  /* ---------- start ---------- */
+  if (!appUrl) { showSetup(''); return; }
+  showListen();
+  begin(); // try to listen straight away; if the browser needs a tap first, the mic button waits for it
+})();
+</script>
+</body>
+</html>

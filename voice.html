@@ -7,23 +7,21 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; manifest-src 'self'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex">
-<meta name="apple-mobile-web-app-title" content="Add To-Do">
-<meta name="application-name" content="Add To-Do">
-<meta name="theme-color" content="#1A73E8">
+<meta name="apple-mobile-web-app-title" content="Add Task">
+<meta name="application-name" content="Add Task">
+<meta name="theme-color" content="#0E9AA7">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest-voice.json">
 <link rel="apple-touch-icon" href="icons/voice-180.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/voice-192.png">
-<title>Add To-Do</title>
+<title>Add Task · Sukoon</title>
 <style>
   :root {
-    --bg: #ffffff; --fg: #202124; --muted: #5f6368; --line: #dadce0; --card: #f1f3f4;
-    --accent: #1a73e8; --accent-fg: #ffffff; --red: #d93025; --green: #188038;
+    --bg: #F2F8F7; --fg: #12262E; --muted: #5B6B70; --line: #D3E2E0; --card: #FFFFFF; --accent: #0B4F6C; --accent-fg: #FFFFFF; --red: #B3261E; --green: #1D7A47; --focus: #0E9AA7;
   }
   @media (prefers-color-scheme: dark) {
-    :root { --bg: #202124; --fg: #e8eaed; --muted: #9aa0a6; --line: #3c4043; --card: #2d2e31;
-      --accent: #8ab4f8; --accent-fg: #202124; --red: #f28b82; --green: #81c995; }
+    :root { --bg: #0D1B22; --fg: #E6F1F2; --muted: #9DB3B8; --line: #26404A; --card: #14252D; --accent: #7CC7E0; --accent-fg: #0D1B22; --red: #FF8A80; --green: #4CD38A; --focus: #3FC3CE; }
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; background: var(--bg); color: var(--fg); }
@@ -38,16 +36,17 @@
 
   /* listen screen */
   #listen { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 20px; }
-  #mic { width: 168px; height: 168px; border-radius: 50%; border: 0; background: var(--accent); color: var(--accent-fg);
+  #mic { width: 168px; height: 168px; border-radius: 50%; border: 0; background: linear-gradient(135deg, #0E9AA7, #2BAE66); color: #FFFFFF;
     font-size: 76px; display: grid; place-items: center; box-shadow: 0 4px 16px rgba(0,0,0,.25); cursor: pointer; }
-  #mic.on { background: var(--red); animation: pulse 1.2s ease-in-out infinite; }
-  @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(217,48,37,.5); } 50% { box-shadow: 0 0 0 26px rgba(217,48,37,0); } }
+  #mic.on { background: #E5484D; animation: pulse 1.2s ease-in-out infinite; }
+  @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(229,72,77,.5); } 50% { box-shadow: 0 0 0 26px rgba(229,72,77,0); } }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
   #status { font-size: 20px; font-weight: 600; min-height: 1.5em; }
   #words { width: 100%; min-height: 3.2em; font-size: 22px; padding: 12px 14px; border-radius: 14px; background: var(--card);
     border: 1px solid var(--line); resize: none; text-align: left; overflow-wrap: anywhere; }
   #words[readonly] { border-color: transparent; }
   #countdown { width: 100%; height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; visibility: hidden; }
-  #countdown i { display: block; height: 100%; width: 0; background: var(--accent); }
+  #countdown i { display: block; height: 100%; width: 0; background: var(--focus); }
   #countdown.run { visibility: visible; }
   #countdown.run i { width: 100%; transition: width 2s linear; }
   .row { display: flex; gap: 10px; width: 100%; }
@@ -72,9 +71,10 @@
 
 <!-- First-time setup -->
 <section id="setup" hidden>
-  <h1>🎤 Add To-Do: set up once</h1>
-  <p>Paste your To-Do app link. It's in the email "Your To-Do phone app link", or in the sheet under
-    <b>📋 AI To-Do → 📱 Phone app</b>. It ends in <b>/exec</b>.</p>
+  <h1>🎤 Add Task: set up once</h1>
+  <p class="muted">🌿 Sukoon · Every ask handled. Peace of mind.</p>
+  <p>Paste your Sukoon app link. It's in the email "🌿 Sukoon: your phone app link", or in the sheet under
+    <b>🌿 Sukoon → 📱 Phone app</b>. It ends in <b>/exec</b>.</p>
   <textarea id="appInput" placeholder="https://script.google.com/a/macros/yourcompany.com/s/…/exec" autocapitalize="off" autocorrect="off" spellcheck="false"></textarea>
   <p id="setupErr" class="err" hidden></p>
   <div class="row" style="margin:8px 0 18px"><button class="btn primary" id="save" type="button">Save</button></div>
@@ -85,16 +85,16 @@
     <div class="row" style="margin:10px 0 14px"><button class="btn" id="copy" type="button">Copy link</button>
       <button class="btn primary" id="start" type="button">Try it</button></div>
     <div class="help">
-      <b>Put it on your home screen as "Add To-Do"</b>
+      <b>Put it on your home screen as "Add Task"</b>
       <ol>
-        <li><b>iPhone (Safari):</b> Share button → <b>Add to Home Screen</b> → name it <b>Add To-Do</b> → Add.</li>
-        <li><b>Android (Chrome):</b> ⋮ → <b>Add to Home screen</b> → name it <b>Add To-Do</b> → Add.</li>
+        <li><b>iPhone (Safari):</b> Share button → <b>Add to Home Screen</b> → name it <b>Add Task</b> → Add.</li>
+        <li><b>Android (Chrome):</b> ⋮ → <b>Add to Home screen</b> → name it <b>Add Task</b> → Add.</li>
       </ol>
     </div>
   </div>
   <p class="muted" style="margin-top:16px">Privacy: this page has no server and no analytics. Your app link is kept only on this
     phone (in this page's address after the # and in this browser's storage). What you say is turned into text by your phone's own
-    speech service and handed to your To-Do app.</p>
+    speech service and handed to your Sukoon app.</p>
 </section>
 
 <!-- Listening -->
@@ -275,7 +275,7 @@
     if (sent) return;
     sent = true;
     clearPending();
-    setStatus('Opening your To-Do…');
+    setStatus('Opening Sukoon…');
     location.assign(appUrl + '?add=' + encodeURIComponent(text.slice(0, 1500)));
   }
 

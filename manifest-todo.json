@@ -1,10 +1,10 @@
 {
-  "name": "To-Do",
-  "short_name": "To-Do",
-  "description": "Opens your AI To-Do app",
+  "name": "Sukoon",
+  "short_name": "Sukoon",
+  "description": "Every ask handled. Peace of mind.",
   "display": "standalone",
-  "background_color": "#D93025",
-  "theme_color": "#D93025",
+  "background_color": "#0B4F6C",
+  "theme_color": "#0B4F6C",
   "icons": [
     {
       "src": "icons/todo-192.png",

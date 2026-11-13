@@ -3,23 +3,25 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<!-- No external scripts, styles, fonts or analytics. This page only forwards you to your own To-Do app. -->
+<!-- No external scripts, styles, fonts or analytics. This page only forwards you to your own Sukoon app. -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; manifest-src 'self'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex">
-<meta name="apple-mobile-web-app-title" content="To-Do">
-<meta name="application-name" content="To-Do">
+<meta name="apple-mobile-web-app-title" content="Sukoon">
+<meta name="application-name" content="Sukoon">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#D93025">
+<meta name="theme-color" content="#0B4F6C">
 <link rel="manifest" href="manifest-todo.json">
 <link rel="apple-touch-icon" href="icons/todo-180.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/todo-192.png">
-<title>To-Do</title>
+<title>Sukoon</title>
 <style>
-  :root { --bg: #ffffff; --fg: #202124; --muted: #5f6368; --line: #dadce0; --card: #f1f3f4; --accent: #D93025; --accent-fg: #ffffff; --red: #d93025; --green: #188038; }
+  :root {
+    --bg: #F2F8F7; --fg: #12262E; --muted: #5B6B70; --line: #D3E2E0; --card: #FFFFFF; --accent: #0B4F6C; --accent-fg: #FFFFFF; --red: #B3261E; --green: #1D7A47; --focus: #0E9AA7;
+  }
   @media (prefers-color-scheme: dark) {
-    :root { --bg: #202124; --fg: #e8eaed; --muted: #9aa0a6; --line: #3c4043; --card: #2d2e31; --accent: #f28b82; --accent-fg: #202124; --red: #f28b82; --green: #81c995; }
+    :root { --bg: #0D1B22; --fg: #E6F1F2; --muted: #9DB3B8; --line: #26404A; --card: #14252D; --accent: #7CC7E0; --accent-fg: #0D1B22; --red: #FF8A80; --green: #4CD38A; --focus: #3FC3CE; }
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; background: var(--bg); color: var(--fg); }
@@ -39,20 +41,22 @@
   .steps ul { margin: 6px 0 0; padding-left: 20px; }
   .steps li { margin: 0 0 6px; }
   .err { color: var(--red); }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
   .ok { color: var(--green); }
   #opening { text-align: center; color: var(--muted); padding-top: 30vh; }
 </style>
 </head>
 <body>
 
-<div id="opening" hidden>Opening your To-Do…</div>
+<div id="opening" hidden>🌿 Opening Sukoon…</div>
 
 <!-- Paste the link (first time, or if this phone has none saved) -->
 <section id="setup" hidden>
   <img class="logo" src="icons/todo-192.png" alt="">
-  <h1>To-Do: set up once</h1>
-  <p>Paste your To-Do app link. It's in the email "Your To-Do phone app link", or in the sheet under
-    <b>📋 AI To-Do → 📱 Phone app</b>. It ends in <b>/exec</b>.</p>
+  <h1>Sukoon: set up once</h1>
+  <p class="muted">Every ask handled. Peace of mind.</p>
+  <p>Paste your Sukoon app link. It's in the email "🌿 Sukoon: your phone app link", or in the sheet under
+    <b>🌿 Sukoon → 📱 Phone app</b>. It ends in <b>/exec</b>.</p>
   <textarea id="appInput" placeholder="https://script.google.com/a/macros/yourcompany.com/s/…/exec" autocapitalize="off" autocorrect="off" spellcheck="false"></textarea>
   <p id="setupErr" class="err" hidden></p>
   <button class="btn primary" id="save" type="button">Save</button>
@@ -61,21 +65,21 @@
 <!-- Add to Home Screen -->
 <section id="install" hidden>
   <img class="logo" src="icons/todo-192.png" alt="">
-  <h1>Add "To-Do" to your home screen</h1>
+  <h1>Add "Sukoon" to your home screen</h1>
   <p class="ok"><b>Your app link is saved ✓</b></p>
   <div class="steps">
-    <b>1. Remove the old grey "G" icon</b> (if you have one): press and hold it → <b>Remove App</b> / <b>Remove</b>.
+    <b>1. Remove the old icon</b> (grey "G" or red ✓, if you have one): press and hold it → <b>Remove App</b> / <b>Remove</b>.
   </div>
   <div class="steps">
     <b>2. Add this page:</b>
     <ul>
-      <li><b>iPhone (Safari):</b> Share button (square with arrow) → <b>Add to Home Screen</b> → keep the name <b>To-Do</b> → Add.</li>
+      <li><b>iPhone (Safari):</b> Share button (square with arrow) → <b>Add to Home Screen</b> → keep the name <b>Sukoon</b> → Add.</li>
       <li><b>Android (Chrome):</b> ⋮ → <b>Add to Home screen</b> (or <b>Install app</b>) → Add.</li>
     </ul>
   </div>
-  <p class="muted">The new red ✓ icon opens your To-Do straight away. Not in Safari or Chrome? Copy this page's address
+  <p class="muted">The new ✓ icon opens Sukoon straight away. Not in Safari or Chrome? Copy this page's address
     and open it there first.</p>
-  <button class="btn" id="openNow" type="button">Open To-Do now</button>
+  <button class="btn primary" id="openNow" type="button">Open Sukoon now</button>
   <button class="btn" id="change" type="button">Change app link</button>
   <p class="muted" style="margin-top:14px">Privacy: this page has no server and no tracking. Your app link stays on this phone
     (in this page's address after the # and in this browser's storage).</p>

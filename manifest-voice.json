@@ -1,10 +1,10 @@
 {
-  "name": "Add To-Do",
-  "short_name": "Add To-Do",
-  "description": "Speak a task and add it to your AI To-Do",
+  "name": "Add Task",
+  "short_name": "Add Task",
+  "description": "Speak a task and add it to Sukoon",
   "display": "standalone",
-  "background_color": "#1A73E8",
-  "theme_color": "#1A73E8",
+  "background_color": "#0E9AA7",
+  "theme_color": "#0E9AA7",
   "icons": [
     {
       "src": "icons/voice-192.png",

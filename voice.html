@@ -97,6 +97,26 @@
     speech service and handed to your Sukoon app.</p>
 </section>
 
+<!-- Add to Home screen (opened from Sukoon's ⚙︎ with ?setup) -->
+<section id="install" hidden>
+  <h1>Add "Add Task" to your home screen</h1>
+  <p class="ok"><b>Your app link is saved ✓</b></p>
+  <div class="help" style="margin-bottom:12px">
+    <b>Opened inside the Sukoon app?</b> Tap <b>⋮</b> → <b>Open in Chrome</b> (iPhone: the compass/Safari button) first.
+    Installing only works in Chrome or Safari.
+  </div>
+  <div class="help" style="margin-bottom:12px">
+    <b>Then add it:</b>
+    <ul style="margin:6px 0 0;padding-left:20px">
+      <li><b>Android (Chrome):</b> ⋮ → <b>Install app</b> (or <b>Add to Home screen</b> → <b>Install</b>).</li>
+      <li><b>iPhone (Safari):</b> Share button → <b>Add to Home Screen</b> → keep the name <b>Add Task</b> → Add.</li>
+    </ul>
+  </div>
+  <p class="muted">If Chrome says it's already installed, uninstall the old "Add To-Do" app first
+    (press and hold its icon → App info → Uninstall).</p>
+  <div class="row"><button class="btn primary" id="tryNow" type="button">Try it now</button></div>
+</section>
+
 <!-- Listening -->
 <section id="listen" hidden>
   <button id="mic" type="button" aria-label="Speak a task">🎤</button>
@@ -135,7 +155,9 @@
     var m = location.hash.match(/(?:^#|&)app=([^&]+)/);
     try { return m ? cleanAppUrl(decodeURIComponent(m[1])) : ''; } catch (e) { return ''; }
   }
-  function pageUrlFor(app) { return location.href.split('#')[0] + '#app=' + encodeURIComponent(app); }
+  // The address to keep (and to save on the home screen): this page, no ?setup, with the link after #.
+  function pageUrlFor(app) { return location.href.split('#')[0].split('?')[0] + '#app=' + encodeURIComponent(app); }
+  var setupMode = /(?:^\?|&)setup(?:=|&|$)/.test(location.search);
 
   var appUrl = fromHash() || cleanAppUrl(store());
   if (appUrl) { store(appUrl); if (!fromHash()) history.replaceState(null, '', pageUrlFor(appUrl)); }
@@ -297,8 +319,16 @@
     if (e.persisted && appUrl) { sent = false; showListen(); }
   });
 
+  $('tryNow').addEventListener('click', function () { $('install').hidden = true; showListen(); begin(); });
+
   /* ---------- start ---------- */
   if (!appUrl) { showSetup(''); return; }
+  if (setupMode) {
+    // Opened from Sukoon's ⚙︎ to install the icon: tidy the address first, then show the steps (no listening yet).
+    history.replaceState(null, '', pageUrlFor(appUrl));
+    $('setup').hidden = true; $('listen').hidden = true; $('install').hidden = false; $('foot').hidden = false;
+    return;
+  }
   showListen();
   begin(); // try to listen straight away; if the browser needs a tap first, the mic button waits for it
 })();

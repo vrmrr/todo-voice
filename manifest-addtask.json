@@ -4,6 +4,7 @@
   "short_name": "Add Task",
   "description": "Speak a task and add it to Sukoon",
   "display": "standalone",
+  "scope": "voice.html",
   "background_color": "#0E9AA7",
   "theme_color": "#0E9AA7",
   "icons": [

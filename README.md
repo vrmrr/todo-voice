@@ -25,6 +25,7 @@ outside that frame, so the browser's speech recognition works.
 - Speech is turned into text by your phone's own speech service (Apple on iPhone, Google on Android), the same as the
   keyboard microphone. The text then goes, over HTTPS, to your own Sukoon app.
 
+Each manifest's `scope` is its own page (`launcher.html` / `voice.html`), so the two install as separate apps.
 The manifests deliberately have no `start_url`: the home-screen icon then opens the page exactly as it was added,
 including `#app=<your link>`, so the link works even where home-screen apps get their own empty storage (iPhone).
 

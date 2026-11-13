@@ -3,6 +3,7 @@
   "short_name": "Sukoon",
   "description": "Every ask handled. Peace of mind.",
   "display": "standalone",
+  "scope": "launcher.html",
   "background_color": "#0B4F6C",
   "theme_color": "#0B4F6C",
   "icons": [

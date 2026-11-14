@@ -9,62 +9,97 @@
 <meta name="robots" content="noindex">
 <meta name="apple-mobile-web-app-title" content="Add Task">
 <meta name="application-name" content="Add Task">
-<meta name="theme-color" content="#0E9AA7">
+<meta name="theme-color" content="#0F1B3D">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<link rel="manifest" href="manifest-addtask.json?v=161">
-<link rel="apple-touch-icon" href="icons/voice-180.png?v=160">
-<link rel="icon" type="image/png" sizes="192x192" href="icons/voice-192.png?v=160">
+<link rel="manifest" href="manifest-addtask.json?v=170">
+<link rel="apple-touch-icon" href="icons/voice-180.png?v=170">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/voice-192.png?v=170">
 <title>Add Task · Sukoon</title>
 <style>
+  /*
+    Sukoon design (matches docs/design/sukoon-ui.html's "voice" screen). System-font stack, not Google Fonts:
+    this page keeps its "no external requests" promise (see README), so sizes/weights are matched instead.
+  */
   :root {
-    --bg: #F2F8F7; --fg: #12262E; --muted: #5B6B70; --line: #D3E2E0; --card: #FFFFFF; --accent: #0B4F6C; --accent-fg: #FFFFFF; --red: #B3261E; --green: #1D7A47; --focus: #0E9AA7;
+    --ink: #0F1B3D; --paper: #F4F6FA; --surface: #FFFFFF; --line: #E3E7EF; --text: #121A2E; --muted: #5E6880;
+    --red: #C2362F; --green: #1D7A47; --lagoon: #8FE3DA;
+    --aurora: linear-gradient(135deg, #22C3B5 0%, #3B82F6 55%, #6D5DF6 100%);
+    --display: -apple-system, system-ui, sans-serif; --body: -apple-system, system-ui, sans-serif;
   }
   @media (prefers-color-scheme: dark) {
-    :root { --bg: #0D1B22; --fg: #E6F1F2; --muted: #9DB3B8; --line: #26404A; --card: #14252D; --accent: #7CC7E0; --accent-fg: #0D1B22; --red: #FF8A80; --green: #4CD38A; --focus: #3FC3CE; }
+    :root { --paper: #0B1226; --surface: #131D3A; --line: #24325E; --text: #E8ECF6; --muted: #9AA5C0; --red: #FF7A70; --green: #4CD38A; }
   }
   * { box-sizing: border-box; }
-  html, body { margin: 0; background: var(--bg); color: var(--fg); }
-  body { font: 18px/1.45 -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Segoe UI", sans-serif;
-    min-height: 100vh; min-height: 100dvh; padding: calc(16px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom));
+  html, body { margin: 0; background: var(--paper); color: var(--text); }
+  body { font: 400 16px/1.45 var(--body); min-height: 100vh; min-height: 100dvh;
     display: flex; flex-direction: column; overflow-x: hidden; -webkit-text-size-adjust: 100%; }
   button, textarea, input { font: inherit; color: inherit; }
-  h1 { font-size: 22px; margin: 0 0 8px; }
+  h1 { font: 700 22px var(--display); letter-spacing: -.01em; margin: 0 0 8px; }
   p { margin: 0 0 12px; }
   .muted { color: var(--muted); font-size: 15px; }
   [hidden] { display: none !important; }
+  :focus-visible { outline: 3px solid #3B82F6; outline-offset: 2px; }
 
-  /* listen screen */
-  #listen { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 20px; }
-  #mic { width: 168px; height: 168px; border-radius: 50%; border: 0; background: linear-gradient(135deg, #0E9AA7, #2BAE66); color: #FFFFFF;
-    font-size: 76px; display: grid; place-items: center; box-shadow: 0 4px 16px rgba(0,0,0,.25); cursor: pointer; }
-  #mic.on { background: #E5484D; animation: pulse 1.2s ease-in-out infinite; }
-  @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(229,72,77,.5); } 50% { box-shadow: 0 0 0 26px rgba(229,72,77,0); } }
-  :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
-  #status { font-size: 20px; font-weight: 600; min-height: 1.5em; }
-  #words { width: 100%; min-height: 3.2em; font-size: 22px; padding: 12px 14px; border-radius: 14px; background: var(--card);
-    border: 1px solid var(--line); resize: none; text-align: left; overflow-wrap: anywhere; }
-  #words[readonly] { border-color: transparent; }
-  #countdown { width: 100%; height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; visibility: hidden; }
-  #countdown i { display: block; height: 100%; width: 0; background: var(--focus); }
-  #countdown.run { visibility: visible; }
-  #countdown.run i { width: 100%; transition: width 2s linear; }
+  /* setup / install screens: paper background, padded */
+  #setup, #install { padding: calc(16px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom)); }
   .row { display: flex; gap: 10px; width: 100%; }
-  .btn { flex: 1; min-height: 52px; border-radius: 26px; border: 1px solid var(--line); background: var(--bg); padding: 0 16px; cursor: pointer; }
-  .btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); font-weight: 600; }
-  .help { width: 100%; text-align: left; background: var(--card); border-radius: 14px; padding: 12px 14px; font-size: 16px; }
+  .btn { flex: 1; min-height: 52px; border-radius: 26px; border: 1px solid var(--line); background: var(--surface); padding: 0 16px; cursor: pointer; }
+  .btn.primary { background: var(--ink); color: #fff; border-color: var(--ink); font-weight: 600; }
+  .help { width: 100%; text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; font-size: 16px; }
   .help > b:first-child { display: block; margin-bottom: 4px; }
   .help ol { margin: 4px 0 0; padding-left: 20px; }
   .err { color: var(--red); }
-  footer { text-align: center; font-size: 14px; margin-top: 12px; }
+  footer { text-align: center; font-size: 14px; margin-top: 12px; padding-bottom: calc(16px + env(safe-area-inset-bottom)); }
   footer button { background: none; border: 0; color: var(--muted); text-decoration: underline; min-height: 44px; cursor: pointer; }
-
-  /* setup screen */
-  #setup textarea { width: 100%; min-height: 110px; border-radius: 12px; border: 1px solid var(--line); background: var(--card);
+  #setup textarea { width: 100%; min-height: 110px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface);
     padding: 10px 12px; font-size: 15px; overflow-wrap: anywhere; }
-  #final { width: 100%; padding: 10px 12px; border-radius: 12px; background: var(--card); font-size: 14px; overflow-wrap: anywhere;
+  #final { width: 100%; padding: 10px 12px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); font-size: 14px; overflow-wrap: anywhere;
     user-select: all; -webkit-user-select: all; }
   .ok { color: var(--green); }
+
+  /* ---------- listen screen: full ink screen, matching the reference "voice" mockup ---------- */
+  #listen { flex: 1; background: var(--ink); color: #fff; display: flex; flex-direction: column; align-items: center;
+    padding: calc(28px + env(safe-area-inset-top)) 24px calc(28px + env(safe-area-inset-bottom)); position: relative; overflow: hidden; }
+  #listen::before { content: ""; position: absolute; inset: auto -120px -160px -120px; height: 420px; border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(109,93,246,.28), transparent); pointer-events: none; }
+  .vbrand { align-self: stretch; display: flex; align-items: center; gap: 8px; font: 600 15px var(--display); letter-spacing: -.01em; position: relative; z-index: 1; }
+  .vmark { width: 22px; height: 22px; border-radius: 7px; background: var(--aurora); display: grid; place-items: center; flex: none; }
+  .vmark svg { width: 14px; height: 14px; stroke: #fff; stroke-width: 2.6; fill: none; }
+  .stage { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; position: relative; z-index: 1; }
+  .rings { position: relative; width: 220px; height: 220px; display: grid; place-items: center; }
+  .rings i { position: absolute; inset: 0; border-radius: 50%; border: 1.5px solid rgba(143,227,218,.35); transition: opacity .3s; opacity: 0; }
+  .rings i:nth-child(2) { inset: 22px; border-color: rgba(143,227,218,.5); }
+  #listen.listening .rings i { opacity: 1; animation: ringpulse 1.6s ease-out infinite; }
+  #listen.listening .rings i:nth-child(2) { animation-delay: .3s; }
+  @keyframes ringpulse { 0% { transform: scale(.85); opacity: .9; } 100% { transform: scale(1.12); opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { #listen.listening .rings i { animation: none; opacity: .6; } }
+  #mic { width: 132px; height: 132px; border-radius: 50%; border: 0; background: var(--aurora); color: #fff;
+    font-size: 0; display: grid; place-items: center; cursor: pointer; position: relative;
+    box-shadow: 0 0 0 10px rgba(59,130,246,.12), 0 24px 60px -10px rgba(59,130,246,.7); }
+  #mic svg { width: 48px; height: 48px; stroke: #fff; stroke-width: 1.9; fill: none; }
+  #mic.on { background: var(--red); box-shadow: 0 0 0 10px rgba(194,54,47,.18), 0 24px 60px -10px rgba(194,54,47,.7); }
+  #status { margin-top: 26px; font: 500 14px var(--body); color: var(--lagoon); display: flex; align-items: center; gap: 8px; min-height: 1.4em; }
+  #status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--lagoon); flex: none; }
+  #status.err { color: #FF9D95; } #status.err::before { background: #FF9D95; }
+  #words { width: 100%; margin-top: 14px; background: none; border: 0; outline: 0; resize: none; text-align: center;
+    font: 600 26px/34px var(--display); letter-spacing: -.015em; color: #fff; overflow-wrap: anywhere; }
+  #words::placeholder { color: rgba(255,255,255,.4); font-weight: 600; }
+  #words:not([readonly]) { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.16); border-radius: 14px;
+    padding: 12px 14px; text-align: left; font: 500 18px/26px var(--body); min-height: 3em; }
+  .hint2 { margin-top: 10px; font: 400 14px/20px var(--body); color: #AEB8D3; text-align: center; }
+  .progress { align-self: stretch; margin-top: auto; position: relative; z-index: 1; }
+  .pl { display: flex; justify-content: space-between; font: 500 13px var(--body); color: #AEB8D3; margin-bottom: 10px; }
+  #countdown { width: 100%; height: 4px; border-radius: 4px; background: rgba(255,255,255,.12); overflow: hidden; visibility: hidden; }
+  #countdown i { display: block; height: 100%; width: 0; background: var(--aurora); }
+  #countdown.run { visibility: visible; }
+  #countdown.run i { width: 100%; transition: width 2s linear; }
+  .vbtns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+  .vbtn { height: 50px; border-radius: 14px; border: 0; display: flex; align-items: center; justify-content: center;
+    gap: 8px; font: 600 15px var(--body); background: rgba(255,255,255,.1); color: #fff; cursor: pointer; }
+  .vbtn.go { background: #fff; color: var(--ink); }
+  .help.vhelp { background: rgba(255,255,255,.08); color: #fff; border: 1px solid rgba(255,255,255,.12); margin-top: 14px; position: relative; z-index: 1; }
+  .help.vhelp .err { color: #FF9D95; }
 </style>
 </head>
 <body>
@@ -119,19 +154,30 @@
 
 <!-- Listening -->
 <section id="listen" hidden>
-  <button id="mic" type="button" aria-label="Speak a task">🎤</button>
-  <div id="status" role="status" aria-live="polite">Tap the mic and say your task</div>
-  <textarea id="words" rows="2" readonly placeholder="Your words appear here" aria-label="Your task"></textarea>
-  <div id="countdown"><i></i></div>
-  <div class="row" id="pendingBtns" hidden>
-    <button class="btn" id="cancel" type="button">Cancel</button>
-    <button class="btn" id="edit" type="button">Edit</button>
+  <div class="vbrand"><span class="vmark"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.2 4.2L19 7"/></svg></span>Sukoon</div>
+  <div class="stage">
+    <div class="rings"><i></i><i></i>
+      <button id="mic" type="button" aria-label="Speak a task">
+        <svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0"/><path d="M12 17.5V21"/></svg>
+      </button>
+    </div>
+    <div id="status" role="status" aria-live="polite">Tap the mic and say your task</div>
+    <textarea id="words" rows="2" readonly placeholder="Your words appear here" aria-label="Your task"></textarea>
+    <p class="hint2" id="hint2">Sukoon will work out the deadline and who asked.</p>
   </div>
-  <div class="row" id="editBtns" hidden>
-    <button class="btn" id="cancel2" type="button">Cancel</button>
-    <button class="btn primary" id="send" type="button">Add</button>
+  <div class="progress">
+    <div class="pl" id="pendingLabel" hidden><span>Adding to Sukoon</span><span>2s</span></div>
+    <div id="countdown"><i></i></div>
+    <div class="vbtns" id="pendingBtns" hidden>
+      <button class="vbtn" id="cancel" type="button">Cancel</button>
+      <button class="vbtn go" id="edit" type="button">Edit</button>
+    </div>
+    <div class="vbtns" id="editBtns" hidden>
+      <button class="vbtn" id="cancel2" type="button">Cancel</button>
+      <button class="vbtn go" id="send" type="button">Add</button>
+    </div>
+    <div class="help vhelp" id="help" hidden></div>
   </div>
-  <div class="help" id="help" hidden></div>
 </section>
 
 <footer id="foot" hidden><button id="change" type="button">Change app link</button></footer>
@@ -198,7 +244,7 @@
     return /^en/i.test(l) ? 'en-IN' : l;   // Indian English understands Indian names best
   }
   function setStatus(t, err) { $('status').textContent = t; $('status').className = err ? 'err' : ''; }
-  function help(html) { var h = $('help'); if (html) { h.innerHTML = html; h.hidden = false; } else { h.hidden = true; h.innerHTML = ''; } }
+  function help(html) { var h = $('help'); if (html) { h.innerHTML = html; h.hidden = false; $('hint2').hidden = true; } else { h.hidden = true; h.innerHTML = ''; $('hint2').hidden = false; } }
 
   function showListen() {
     $('setup').hidden = true; $('listen').hidden = false; $('foot').hidden = false;
@@ -225,7 +271,7 @@
       rec.interimResults = true;
       rec.continuous = false;
       rec.maxAlternatives = 1;
-      rec.onstart = function () { listening = true; $('mic').classList.add('on'); $('mic').setAttribute('aria-label', 'Stop'); setStatus('Listening… speak your task'); };
+      rec.onstart = function () { listening = true; $('mic').classList.add('on'); $('listen').classList.add('listening'); $('mic').setAttribute('aria-label', 'Stop'); setStatus('Listening… speak your task'); };
       rec.onresult = function (ev) {
         var interim = '';
         for (var i = ev.resultIndex; i < ev.results.length; i++) {
@@ -236,7 +282,7 @@
       };
       rec.onerror = function (ev) { onError(ev.error || 'error'); };
       rec.onend = function () {
-        listening = false; $('mic').classList.remove('on'); $('mic').setAttribute('aria-label', 'Speak a task');
+        listening = false; $('mic').classList.remove('on'); $('listen').classList.remove('listening'); $('mic').setAttribute('aria-label', 'Speak a task');
         var text = $('words').value.trim();
         if (text && !$('help').innerHTML) startPending();
         else if (!text && !$('help').innerHTML) setStatus('Tap the mic and say your task');
@@ -273,7 +319,9 @@
 
   function startPending() {
     clearPending();
-    setStatus('Adding in 2 seconds…');
+    setStatus('Got it');
+    $('hint2').hidden = true;
+    $('pendingLabel').hidden = false;
     $('pendingBtns').hidden = false;
     var bar = $('countdown');
     bar.classList.remove('run'); void bar.offsetWidth; bar.classList.add('run');
@@ -283,6 +331,8 @@
     if (timer) { clearTimeout(timer); timer = null; }
     $('countdown').classList.remove('run');
     $('pendingBtns').hidden = true;
+    $('pendingLabel').hidden = true;
+    $('hint2').hidden = false;
   }
   function typeMode() {
     clearPending();

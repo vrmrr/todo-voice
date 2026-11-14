@@ -2,12 +2,13 @@
 
 Two small pages for the [Sukoon](https://github.com/vrmrr/gmauto) phone app (every ask handled, peace of mind):
 
-- `voice.html` (**Add Task**, teal-to-green 🎤 icon): a one-tap voice button.
-- `launcher.html` (**Sukoon**, blue-to-teal ✓ icon): a home-screen icon that opens Sukoon straight away. Google's
-  own page can only show a grey "G" icon, because Google controls its page head.
+- `voice.html` (**Add Task**, ink square with an aurora-gradient 🎤 icon): a one-tap voice button, styled to match
+  the Sukoon app's design (`docs/design/sukoon-ui.html` in the main repo).
+- `launcher.html` (**Sukoon**, aurora-gradient square with a white ✓ icon): a home-screen icon that opens Sukoon
+  straight away. Google's own page can only show a grey "G" icon, because Google controls its page head.
 
 `icons/` holds the icons (SVG sources and PNGs at 180, 192 and 512 px, plus maskable versions);
-`manifest-todo.json` and `manifest-voice.json` describe the two home-screen apps.
+`manifest-sukoon.json` and `manifest-addtask.json` describe the two home-screen apps.
 
 You tap, speak, and the page opens your own Sukoon app with your words (`…/exec?add=<text>`). The app's quick-add does
 the rest (deadline, who asked, type).

@@ -1,10 +1,10 @@
 {
-  "id": "sukoon-add-task",
+  "id": "/todo-voice/add-task",
   "name": "Sukoon · Add Task",
   "short_name": "Add Task",
   "description": "Speak a task and add it to Sukoon",
   "display": "standalone",
-  "scope": "voice.html",
+  "scope": "/todo-voice/voice",
   "background_color": "#0F1B3D",
   "theme_color": "#0F1B3D",
   "icons": [

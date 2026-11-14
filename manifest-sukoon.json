@@ -1,10 +1,10 @@
 {
-  "id": "sukoon",
+  "id": "/todo-voice/sukoon",
   "name": "Sukoon",
   "short_name": "Sukoon",
   "description": "Every ask handled. Peace of mind.",
   "display": "standalone",
-  "scope": "launcher.html",
+  "scope": "/todo-voice/launcher",
   "background_color": "#0F1B3D",
   "theme_color": "#0F1B3D",
   "icons": [

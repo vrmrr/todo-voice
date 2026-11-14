@@ -160,19 +160,27 @@
   // leaving it, so Android never shows the "script.google.com" bar. Falls back to the normal hand-off
   // (location.replace) if the app doesn't confirm it actually rendered (not a sign-in page) within 8 s.
   var frameSettled = false;
+  var TRUSTED_ORIGIN_RE = /^https:\/\/(script\.google\.com|[a-zA-Z0-9-]+\.googleusercontent\.com)$/;
   function tryFrame() {
     var frame = document.createElement('iframe');
     frame.id = 'appFrame';
     frame.title = 'Sukoon';
     var fallbackTimer = setTimeout(function () { settle(false); }, 8000);
+    // Security (App.html's own guardAndBoot_): browsers without location.ancestorOrigins (Firefox) need this
+    // page to prove it really is the launcher before App.html shows anything. Best-effort: the app runs in a
+    // nested iframe we can't read cross-origin, so this is sent broadly rather than to one exact window.
+    var helloTimer = setInterval(function () {
+      try { frame.contentWindow && frame.contentWindow.postMessage({ sukoonLauncher: 'hello' }, 'https://script.google.com'); } catch (e) { /* ignore */ }
+      try { frame.contentWindow && frame.contentWindow.frames[0] && frame.contentWindow.frames[0].postMessage({ sukoonLauncher: 'hello' }, '*'); } catch (e) { /* ignore */ }
+    }, 300);
     function onMessage(ev) {
-      if (ev.data && ev.data.sukoon === 'ready' &&
-        (ev.origin === 'https://script.google.com' || /\.googleusercontent\.com$/.test(ev.origin))) settle(true);
+      if (ev.data && ev.data.sukoon === 'ready' && TRUSTED_ORIGIN_RE.test(ev.origin)) settle(true);
     }
     function settle(ok) {
       if (frameSettled) return;
       frameSettled = true;
       clearTimeout(fallbackTimer);
+      clearInterval(helloTimer);
       window.removeEventListener('message', onMessage);
       if (ok) {
         frame.style.display = 'block';

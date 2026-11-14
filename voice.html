@@ -15,7 +15,7 @@
 <link rel="manifest" href="manifest-addtask.json?v=170">
 <link rel="apple-touch-icon" href="icons/voice-180.png?v=170">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/voice-192.png?v=170">
-<title>Add Task · Sukoon</title>
+<title>add task · sukoon</title>
 <style>
   /*
     Sukoon design (matches docs/design/sukoon-ui.html's "voice" screen). System-font stack, not Google Fonts:
@@ -64,8 +64,8 @@
   #listen::before { content: ""; position: absolute; inset: auto -120px -160px -120px; height: 420px; border-radius: 50%;
     background: radial-gradient(closest-side, rgba(109,93,246,.28), transparent); pointer-events: none; }
   .vbrand { align-self: stretch; display: flex; align-items: center; gap: 8px; font: 600 15px var(--display); letter-spacing: -.01em; position: relative; z-index: 1; }
-  .vmark { width: 22px; height: 22px; border-radius: 7px; background: var(--aurora); display: grid; place-items: center; flex: none; }
-  .vmark svg { width: 14px; height: 14px; stroke: #fff; stroke-width: 2.6; fill: none; }
+  .vicon { width: 32px; height: 32px; border-radius: 9px; flex: none; }
+  .vword { font: 700 22px var(--display); letter-spacing: -.035em; color: #fff; }
   .stage { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; position: relative; z-index: 1; }
   .rings { position: relative; width: 220px; height: 220px; display: grid; place-items: center; }
   .rings i { position: absolute; inset: 0; border-radius: 50%; border: 1.5px solid rgba(143,227,218,.35); transition: opacity .3s; opacity: 0; }
@@ -107,9 +107,9 @@
 <!-- First-time setup -->
 <section id="setup" hidden>
   <h1>🎤 Add Task: set up once</h1>
-  <p class="muted">🌿 Sukoon · Every ask handled. Peace of mind.</p>
-  <p>Paste your Sukoon app link. It's in the email "🌿 Sukoon: your phone app link", or in the sheet under
-    <b>🌿 Sukoon → 📱 Phone app</b>. It ends in <b>/exec</b>.</p>
+  <p class="muted">Sukoon · Every ask handled. Peace of mind.</p>
+  <p>Paste your Sukoon app link. It's in the email "Sukoon: your phone app link", or in the sheet under
+    <b>Sukoon → 📱 Phone app</b>. It ends in <b>/exec</b>.</p>
   <textarea id="appInput" placeholder="https://script.google.com/a/macros/yourcompany.com/s/…/exec" autocapitalize="off" autocorrect="off" spellcheck="false"></textarea>
   <p id="setupErr" class="err" hidden></p>
   <div class="row" style="margin:8px 0 18px"><button class="btn primary" id="save" type="button">Save</button></div>
@@ -154,7 +154,7 @@
 
 <!-- Listening -->
 <section id="listen" hidden>
-  <div class="vbrand"><span class="vmark"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.2 4.2L19 7"/></svg></span>Sukoon</div>
+  <div class="vbrand"><img class="vicon" src="icons/todo-192.png?v=180" alt=""><span class="vword">sukoon</span></div>
   <div class="stage">
     <div class="rings"><i></i><i></i>
       <button id="mic" type="button" aria-label="Speak a task">

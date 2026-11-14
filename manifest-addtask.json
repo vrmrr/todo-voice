@@ -1,6 +1,6 @@
 {
   "id": "sukoon-add-task",
-  "name": "Add Task",
+  "name": "Sukoon · Add Task",
   "short_name": "Add Task",
   "description": "Speak a task and add it to Sukoon",
   "display": "standalone",

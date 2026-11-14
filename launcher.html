@@ -12,10 +12,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0F1B3D">
-<link rel="manifest" href="manifest-sukoon.json?v=170">
-<link rel="apple-touch-icon" href="icons/todo-180.png?v=170">
-<link rel="icon" type="image/png" sizes="192x192" href="icons/todo-192.png?v=170">
-<title>Sukoon</title>
+<link rel="manifest" href="manifest-sukoon.json?v=180">
+<link rel="apple-touch-icon" href="icons/todo-180.png?v=180">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/todo-192.png?v=180">
+<title>sukoon</title>
 <style>
   /* Sukoon design (matches docs/design/sukoon-ui.html). System-font stack, not Google Fonts: this page
      keeps its "no external requests" promise (see README), so sizes/weights are matched instead. */
@@ -49,28 +49,42 @@
   :focus-visible { outline: 3px solid #3B82F6; outline-offset: 2px; }
   .ok { color: var(--green); }
 
-  /* ---------- "Opening Sukoon…" transition: full ink screen with the brand mark ---------- */
+  /* ---------- splash: matches docs/design/sukoon-brand.html exactly ---------- */
   #opening { position: fixed; inset: 0; background: var(--ink); color: #fff; display: flex; flex-direction: column;
-    align-items: center; justify-content: center; gap: 16px; z-index: 1; }
-  #opening .omark { width: 64px; height: 64px; border-radius: 20px; background: var(--aurora); display: grid; place-items: center; }
-  #opening .omark svg { width: 34px; height: 34px; stroke: #fff; stroke-width: 2.2; fill: none; }
-  #opening p { margin: 0; font: 500 15px var(--body); color: #AEB8D3; }
+    align-items: center; justify-content: center; z-index: 1; overflow: hidden; }
+  #opening::before { content: ""; position: absolute; width: 420px; height: 420px; border-radius: 50%; top: 50%; left: 50%;
+    transform: translate(-50%, -62%);
+    background: radial-gradient(closest-side, rgba(52,211,153,.22), rgba(59,130,246,.14) 55%, transparent); }
+  #opening .sicon { position: relative; width: 112px; height: 112px; border-radius: 30px;
+    box-shadow: 0 24px 60px -16px rgba(52,211,153,.45), inset 0 0 0 1px rgba(255,255,255,.12); }
+  #opening .sicon img { width: 100%; height: 100%; display: block; border-radius: inherit; }
+  #opening .sword { position: relative; margin-top: 26px; font: 700 44px var(--display); letter-spacing: -.035em; }
+  #opening .stag { position: relative; margin-top: 12px; font: 400 16px var(--body); color: var(--onInk, #AEB8D3); }
+  #opening .sload { position: absolute; bottom: 72px; width: 120px; height: 3px; border-radius: 3px; background: rgba(255,255,255,.12); overflow: hidden; }
+  #opening .sload i { display: block; height: 100%; width: 45%; border-radius: 3px; background: var(--aurora); }
+  #opening .sload.run i { width: 20%; animation: sload 1.1s ease-in-out infinite alternate; }
+  @keyframes sload { from { width: 15%; margin-left: 0; } to { width: 70%; margin-left: 30%; } }
+  @media (prefers-reduced-motion: reduce) { #opening .sload.run i { animation: none; width: 55%; } }
+  #opening .sfoot { position: absolute; bottom: 34px; font: 400 12px var(--body); color: #6F7A99; }
 </style>
 </head>
 <body>
 
 <div id="opening" hidden>
-  <span class="omark"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.2 4.2L19 7"/></svg></span>
-  <p>Opening Sukoon…</p>
+  <div class="sicon"><img src="icons/todo-192.png?v=180" alt=""></div>
+  <div class="sword">sukoon</div>
+  <p class="stag">Every ask handled.</p>
+  <div class="sload" id="sload"><i></i></div>
+  <p class="sfoot">Opening your day</p>
 </div>
 
 <!-- Paste the link (first time, or if this phone has none saved) -->
 <section id="setup" hidden>
-  <img class="logo" src="icons/todo-192.png?v=170" alt="">
+  <img class="logo" src="icons/todo-192.png?v=180" alt="">
   <h1>Sukoon: set up once</h1>
   <p class="muted">Every ask handled. Peace of mind.</p>
-  <p>Paste your Sukoon app link. It's in the email "🌿 Sukoon: your phone app link", or in the sheet under
-    <b>🌿 Sukoon → 📱 Phone app</b>. It ends in <b>/exec</b>.</p>
+  <p>Paste your Sukoon app link. It's in the email "Sukoon: your phone app link", or in the sheet under
+    <b>Sukoon → 📱 Phone app</b>. It ends in <b>/exec</b>.</p>
   <textarea id="appInput" placeholder="https://script.google.com/a/macros/yourcompany.com/s/…/exec" autocapitalize="off" autocorrect="off" spellcheck="false"></textarea>
   <p id="setupErr" class="err" hidden></p>
   <button class="btn primary" id="save" type="button">Save</button>
@@ -78,11 +92,12 @@
 
 <!-- Add to Home Screen -->
 <section id="install" hidden>
-  <img class="logo" src="icons/todo-192.png?v=170" alt="">
+  <img class="logo" src="icons/todo-192.png?v=180" alt="">
   <h1>Add "Sukoon" to your home screen</h1>
   <p class="ok"><b>Your app link is saved ✓</b></p>
   <div class="steps">
-    <b>1. Remove the old icon</b> (grey "G" or red ✓, if you have one): press and hold it → <b>Remove App</b> / <b>Remove</b>.
+    <b>1. Remove any old icon</b> (grey "G", or an earlier Sukoon icon), if you have one: press and hold it →
+    <b>Remove App</b> / <b>Remove</b>.
   </div>
   <div class="steps">
     <b>2. Add this page:</b>
@@ -91,7 +106,7 @@
       <li><b>Android (Chrome):</b> ⋮ → <b>Add to Home screen</b> (or <b>Install app</b>) → Add.</li>
     </ul>
   </div>
-  <p class="muted">The new ✓ icon opens Sukoon straight away. Not in Safari or Chrome? Copy this page's address
+  <p class="muted">The new leaf icon opens Sukoon straight away. Not in Safari or Chrome? Copy this page's address
     and open it there first.</p>
   <button class="btn primary" id="openNow" type="button">Open Sukoon now</button>
   <button class="btn" id="change" type="button">Change app link</button>
@@ -124,9 +139,15 @@
 
   // Wait until the page has fully loaded before leaving: Android Chrome only checks an installed app's manifest
   // (name, colours, icons) for updates while the app's own page is open. Leaving instantly meant it never did.
+  // The splash also stays on screen at least 700 ms (docs/v1.8-brand.md Part B), so it never just flickers.
   function go() {
+    var shownAt = Date.now();
     $('opening').hidden = false; $('setup').hidden = true; $('install').hidden = true;
-    var leave = function () { setTimeout(function () { location.replace(appUrl); }, 400); };
+    $('sload').classList.add('run');
+    var leave = function () {
+      var wait = Math.max(0, 700 - (Date.now() - shownAt));
+      setTimeout(function () { location.replace(appUrl); }, wait);
+    };
     if (document.readyState === 'complete') leave(); else window.addEventListener('load', leave);
   }
 

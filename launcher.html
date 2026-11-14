@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <!-- No external scripts, styles, fonts or analytics. This page only forwards you to your own Sukoon app. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; manifest-src 'self'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; manifest-src 'self'; base-uri 'none'; form-action 'none'; frame-src https://script.google.com">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex">
 <meta name="apple-mobile-web-app-title" content="Sukoon">
@@ -66,6 +66,11 @@
   @keyframes sload { from { width: 15%; margin-left: 0; } to { width: 70%; margin-left: 30%; } }
   @media (prefers-reduced-motion: reduce) { #opening .sload.run i { animation: none; width: 55%; } }
   #opening .sfoot { position: absolute; bottom: 34px; font: 400 12px var(--body); color: #6F7A99; }
+  #opening { transition: opacity .2s; }
+  #opening.out { opacity: 0; pointer-events: none; }
+  /* Part D experiment: the app loaded full-screen, instead of leaving this page, so Android's Chrome
+     Custom Tab bar ("Sukoon · script.google.com") never shows. See docs/v1.8-brand.md Part D. */
+  #appFrame { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; z-index: 0; background: #fff; display: none; }
 </style>
 </head>
 <body>
@@ -146,9 +151,42 @@
     $('sload').classList.add('run');
     var leave = function () {
       var wait = Math.max(0, 700 - (Date.now() - shownAt));
-      setTimeout(function () { location.replace(appUrl); }, wait);
+      setTimeout(tryFrame, wait);
     };
     if (document.readyState === 'complete') leave(); else window.addEventListener('load', leave);
+  }
+
+  // Part D experiment (docs/v1.8-brand.md): load the app full-screen in this page's own iframe, instead of
+  // leaving it, so Android never shows the "script.google.com" bar. Falls back to the normal hand-off
+  // (location.replace) if the app doesn't confirm it actually rendered (not a sign-in page) within 8 s.
+  var frameSettled = false;
+  function tryFrame() {
+    var frame = document.createElement('iframe');
+    frame.id = 'appFrame';
+    frame.title = 'Sukoon';
+    var fallbackTimer = setTimeout(function () { settle(false); }, 8000);
+    function onMessage(ev) {
+      if (ev.data && ev.data.sukoon === 'ready' &&
+        (ev.origin === 'https://script.google.com' || /\.googleusercontent\.com$/.test(ev.origin))) settle(true);
+    }
+    function settle(ok) {
+      if (frameSettled) return;
+      frameSettled = true;
+      clearTimeout(fallbackTimer);
+      window.removeEventListener('message', onMessage);
+      if (ok) {
+        frame.style.display = 'block';
+        $('opening').classList.add('out');
+        setTimeout(function () { $('opening').hidden = true; }, 200);
+      } else {
+        frame.remove();
+        location.replace(appUrl);
+      }
+    }
+    window.addEventListener('message', onMessage);
+    frame.addEventListener('error', function () { settle(false); });
+    document.body.appendChild(frame);
+    frame.src = appUrl;
   }
 
   function showInstall() {
